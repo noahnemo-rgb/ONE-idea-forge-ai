@@ -1,0 +1,43 @@
+/* ONE Trust Colophon — public design tokens
+   Products may override. These are defaults, not a shared host. */
+
+:root {
+  --one-ink: #1a2433;
+  --one-paper: #f7f1e6;
+  --one-gold: #c6a15b;
+  --one-sea: #2a6f7a;
+  --one-foam: #e8eef2;
+  --one-obsidian: #0b0d10;
+  --one-amber: #e8b86d;
+  --one-agape: #7a1f2b;
+  --one-rule: 0.08rem solid var(--one-gold);
+  --one-serif: "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --one-sans: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --one-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+.one-colophon {
+  color: var(--one-ink);
+  background: var(--one-paper);
+  border-top: var(--one-rule);
+  font-family: var(--one-sans);
+  font-size: 0.9rem;
+  line-height: 1.45;
+  padding: 1.25rem 1rem;
+}
+
+.one-colophon .motto {
+  font-family: var(--one-serif);
+  font-style: italic;
+  color: var(--one-sea);
+}
+
+.one-guest-banner {
+  font-family: var(--one-sans);
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+  color: var(--one-ink);
+  background: var(--one-foam);
+  border-left: 0.18rem solid var(--one-gold);
+  padding: 0.4rem 0.7rem;
+}

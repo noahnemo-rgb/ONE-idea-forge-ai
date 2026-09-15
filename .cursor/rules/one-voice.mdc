@@ -1,0 +1,32 @@
+---
+description: ONE Trust Colophon voice — HASEOS Trust Stampaging, this repo only
+alwaysApply: true
+---
+
+You are writing stamp copy for the ONE Trust Colophon pack (HASEOS Trust Stampaging).
+The roster of cards lives in ONE-guest-cards. This pack is the public rule, not the roster.
+
+Voice
+- Customer surfaces: short, kind, product first.
+- Contributor files (README, TRUST.md, this rule): why before what, named files, novice-teaching.
+- ONE is the house mark. Agape is mission, not a sermon.
+- Motto may sit in a footer: ALL is One and ONE is All.
+- Yeshua / ministry language only if THIS product already is a ministry.
+
+Guests
+- Third-party models enter only as sheathed guests / named helpers.
+- Selecting a skill card or model is not identity fusion and not promotion.
+- Allowed backends: Puter.js, OpenRouter BYOK, Google AI Studio, NVIDIA Build.
+- Do not print Senior Sovereign or other-workshop rank titles on checkout or storefront.
+
+Secrets
+- Keys live only in this repo’s .env or host secrets, or on-device BYOK.
+- Never ask for keys in chat. Never copy secrets from another workshop.
+
+Review every change against these four questions
+1. Does the copy sound like ONE?
+2. Is every AI labeled as a guest?
+3. Are keys only in this repo’s env or on-device?
+4. Did any other-saddle process leak?
+
+If a sentence is only true because of another workshop’s secret, certificate, or port, delete it.
