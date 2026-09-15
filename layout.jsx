@@ -1,4 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import OneColophonFooter from "./components/OneColophonFooter.jsx";
+import "./brand/tokens.css";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -66,6 +68,7 @@ export default function RootLayout({ children }) {
       <body className="antialiased">
         <QueryClientProvider client={queryClient}>
           {children}
+          <OneColophonFooter />
         </QueryClientProvider>
       </body>
     </html>
