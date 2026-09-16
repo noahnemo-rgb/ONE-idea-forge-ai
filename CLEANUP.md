@@ -19,3 +19,5 @@ Product server pieces that lived under `__create/` were rehomed to `server/` (no
 - `api/stripe/webhook/` — product billing scaffold, not Anything menu
 - `client-integrations/` — still look like host UI wrappers (re-export shims for shadcn/chakra/maps/pdf/markdown/recharts), not ideation product code. Imports still resolve; not deleted this slice.
 - `patches/` — still look like Expo/RN/metro host `patch-package` files, not product routes. Imports still resolve; not deleted this slice.
+
+P004: pinned `react-router-hono-server` to `2.21.0` (newest that still peers `@types/react` ^18) and replaced the Anything mobile `package-lock.json` so React 18 types stay coherent and `npm install` does not need `--force`.
