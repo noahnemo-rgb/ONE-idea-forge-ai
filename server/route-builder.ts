@@ -3,18 +3,12 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Hono } from 'hono';
 import type { Handler } from 'hono/types';
-import updatedFetch from '../src/__create/fetch';
 
 const API_BASENAME = '/api';
 const api = new Hono();
 
-// Get current directory
 const __dirname = join(fileURLToPath(new URL('.', import.meta.url)), '../src/app/api');
-if (globalThis.fetch) {
-  globalThis.fetch = updatedFetch;
-}
 
-// Recursively find all route.js files
 async function findRouteFiles(dir: string): Promise<string[]> {
   const files = await readdir(dir);
   let routes: string[] = [];
@@ -27,9 +21,8 @@ async function findRouteFiles(dir: string): Promise<string[]> {
       if (statResult.isDirectory()) {
         routes = routes.concat(await findRouteFiles(filePath));
       } else if (file === 'route.js') {
-        // Handle root route.js specially
         if (filePath === join(__dirname, 'route.js')) {
-          routes.unshift(filePath); // Add to beginning of array
+          routes.unshift(filePath);
         } else {
           routes.push(filePath);
         }
@@ -42,11 +35,10 @@ async function findRouteFiles(dir: string): Promise<string[]> {
   return routes;
 }
 
-// Helper function to transform file path to Hono route path
 function getHonoPath(routeFile: string): { name: string; pattern: string }[] {
   const relativePath = routeFile.replace(__dirname, '');
   const parts = relativePath.split('/').filter(Boolean);
-  const routeParts = parts.slice(0, -1); // Remove 'route.js'
+  const routeParts = parts.slice(0, -1);
   if (routeParts.length === 0) {
     return [{ name: 'root', pattern: '' }];
   }
@@ -63,7 +55,6 @@ function getHonoPath(routeFile: string): { name: string; pattern: string }[] {
   return transformedParts;
 }
 
-// Import and register all routes
 async function registerRoutes() {
   const routeFiles = (
     await findRouteFiles(__dirname).catch((error) => {
@@ -76,7 +67,6 @@ async function registerRoutes() {
       return b.length - a.length;
     });
 
-  // Clear existing routes
   api.routes = [];
 
   for (const routeFile of routeFiles) {
@@ -131,16 +121,14 @@ async function registerRoutes() {
   }
 }
 
-// Initial route registration
 await registerRoutes();
 
-// Hot reload routes in development
 if (import.meta.env.DEV) {
   import.meta.glob('../src/app/api/**/route.js', {
     eager: true,
   });
   if (import.meta.hot) {
-    import.meta.hot.accept((newSelf) => {
+    import.meta.hot.accept(() => {
       registerRoutes().catch((err) => {
         console.error('Error reloading routes:', err);
       });

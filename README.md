@@ -8,3 +8,5 @@ This product received ONE-trust-colophon on 2026-09-15. Law-as-files: https://gi
 `legal/` is the stamp copy. Existing `terms/` and `privacy/` remain until HITL merges with counsel.
 
 Footer and /trust wired in P002. Living Seal still later HITL.
+
+P003 stripped Anything preview hooks. Stripe webhook scaffold kept. Stamp kept.

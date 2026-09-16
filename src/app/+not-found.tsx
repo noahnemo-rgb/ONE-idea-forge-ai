@@ -7,10 +7,9 @@ import {
   useRouter,
   useSitemap,
 } from 'expo-router';
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ErrorBoundaryWrapper } from '../../__create/SharedErrorBoundary';
 
 interface ParentSitemap {
   expoPages?: Array<{
@@ -25,42 +24,8 @@ function NotFoundScreen() {
   const router = useRouter();
   const params = useGlobalSearchParams();
   const expoSitemap = useSitemap();
-  const [sitemap, setSitemap] = useState<SitemapType | ParentSitemap | null>(expoSitemap);
-
-  // Force full reload on Fast Refresh - staying on the not-found page after hot reload
-  // doesn't make sense since the missing page may now exist.
-  // useEffect with [] deps re-runs on Fast Refresh, but hasInitialized persists.
-  useEffect(() => {
-    if (hasInitialized && typeof window !== 'undefined' &&  process.env.EXPO_PUBLIC_CREATE_ENV === 'DEVELOPMENT') {
-      window.location.reload();
-    }
-    hasInitialized = true;
-  }, []);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.parent && window.parent !== window) {
-      const handler = (event: MessageEvent) => {
-        if (event.data.type === 'sandbox:sitemap') {
-          window.removeEventListener('message', handler);
-          setSitemap(event.data.sitemap);
-        }
-      };
-
-      window.parent.postMessage(
-        {
-          type: 'sandbox:sitemap',
-        },
-        '*'
-      );
-      window.addEventListener('message', handler);
-
-      return () => {
-        window.removeEventListener('message', handler);
-      };
-    }
-  }, []);
-
-  const isExpoSitemap = sitemap === expoSitemap;
+  const sitemap = expoSitemap;
+  const isExpoSitemap = true;
   const missingPath = params['not-found']?.[0] || '';
 
   const availableRoutes = useMemo(() => {
@@ -107,18 +72,6 @@ function NotFoundScreen() {
     }
   };
 
-  const handleCreatePage = useCallback(() => {
-    if (typeof window !== 'undefined' && window.parent && window.parent !== window) {
-      window.parent.postMessage(
-        {
-          type: 'sandbox:web:create',
-          path: missingPath,
-          view: 'mobile',
-        },
-        '*'
-      );
-    }
-  }, [missingPath]);
   return (
     <>
       <Stack.Screen options={{ title: 'Page Not Found', headerShown: false }} />
@@ -147,27 +100,6 @@ function NotFoundScreen() {
               Looks like "<Text style={styles.boldText}>/{missingPath}</Text>" isn't part of your
               project. But no worries, you've got options!
             </Text>
-
-            {typeof window !== 'undefined' && window.parent && window.parent !== window && (
-              <View style={styles.createPageContainer}>
-                <View style={styles.createPageContent}>
-                  <View style={styles.createPageTextContainer}>
-                    <Text style={styles.createPageTitle}>Build it from scratch</Text>
-                    <Text style={styles.createPageDescription}>
-                      Create a new screen to live at "/{missingPath}"
-                    </Text>
-                  </View>
-                  <View style={styles.createPageButtonContainer}>
-                    <TouchableOpacity
-                      onPress={() => handleCreatePage()}
-                      style={styles.createPageButton}
-                    >
-                      <Text style={styles.createPageButtonText}>Create Screen</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </View>
-            )}
 
             <Text style={styles.routesLabel}>Check out all your project's routes here ↓</Text>
             {!isExpoSitemap && sitemap ? (
@@ -440,13 +372,6 @@ const styles = StyleSheet.create({
   },
 });
 
-// Track if this module has been initialized - this flag persists across Fast Refresh
-let hasInitialized = false;
-
 export default () => {
-  return (
-    <ErrorBoundaryWrapper>
-      <NotFoundScreen />
-    </ErrorBoundaryWrapper>
-  );
+  return <NotFoundScreen />;
 };

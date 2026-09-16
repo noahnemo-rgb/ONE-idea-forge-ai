@@ -4,9 +4,7 @@ import { reactRouterHonoServer } from 'react-router-hono-server/dev';
 import { defineConfig } from 'vite';
 import babel from 'vite-plugin-babel';
 import tsconfigPaths from 'vite-tsconfig-paths';
-import { addRenderIds } from './plugins/addRenderIds';
 import { aliases } from './plugins/aliases';
-import consoleToParent from './plugins/console-to-parent';
 import { layoutWrapperPlugin } from './plugins/layouts';
 import { loadFontsFromTailwindSource } from './plugins/loadFontsFromTailwindSource';
 import { nextPublicProcessEnv } from './plugins/nextPublicProcessEnv';
@@ -36,7 +34,7 @@ export default defineConfig({
     nextPublicProcessEnv(),
     restartEnvFileChange(),
     reactRouterHonoServer({
-      serverEntryPoint: './__create/index.ts',
+      serverEntryPoint: './server/index.ts',
       runtime: 'node',
     }),
     babel({
@@ -58,9 +56,7 @@ export default defineConfig({
         'src/**/route.ts',
       ],
     }),
-    consoleToParent(),
     loadFontsFromTailwindSource(),
-    addRenderIds(),
     reactRouter(),
     tsconfigPaths(),
     aliases(),
@@ -70,9 +66,8 @@ export default defineConfig({
     alias: {
       lodash: 'lodash-es',
       'npm:stripe': 'stripe',
-      stripe: path.resolve(__dirname, './src/__create/stripe'),
       '@auth/create/react': '@hono/auth-js/react',
-      '@auth/create': path.resolve(__dirname, './src/__create/@auth/create'),
+      '@auth/create': path.resolve(__dirname, './src/auth/create.js'),
       '@': path.resolve(__dirname, 'src'),
     },
     dedupe: ['react', 'react-dom'],
