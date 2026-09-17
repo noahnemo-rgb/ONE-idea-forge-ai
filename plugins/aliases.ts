@@ -18,6 +18,13 @@ export function aliases(): Plugin {
           return filePath;
         }
       }
+      for (const ext of extensions) {
+        const filePath = path.resolve(__dirname, '../', `./${sourcePath}${ext}`);
+
+        if (existsSync(filePath)) {
+          return filePath;
+        }
+      }
       return;
     },
   };

@@ -68,6 +68,9 @@ export default defineConfig({
       'npm:stripe': 'stripe',
       '@auth/create/react': '@hono/auth-js/react',
       '@auth/create': path.resolve(__dirname, './src/auth/create.js'),
+      '@/utils': path.resolve(__dirname, 'utils'),
+      '@/hooks': path.resolve(__dirname, 'hooks'),
+      '@/components': path.resolve(__dirname, 'components'),
       '@': path.resolve(__dirname, 'src'),
     },
     dedupe: ['react', 'react-dom'],
@@ -81,7 +84,7 @@ export default defineConfig({
       overlay: false,
     },
     warmup: {
-      clientFiles: ['./src/app/**/*', './src/app/root.tsx', './src/app/routes.ts'],
+      clientFiles: ['./root.tsx', './routes.ts', './**/page.jsx'],
     },
   },
 });

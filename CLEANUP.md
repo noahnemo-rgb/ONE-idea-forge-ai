@@ -23,3 +23,11 @@ Product server pieces that lived under `__create/` were rehomed to `server/` (no
 P004: pinned `react-router-hono-server` to `2.21.0` (newest that still peers `@types/react` ^18) and replaced the Anything mobile `package-lock.json` so React 18 types stay coherent and `npm install` does not need `--force`.
 
 P005 added .gitignore.
+
+P006: boot failed because appDirectory pointed at src/app; web root is repo-root root.tsx. client-integrations/ and patches/ are still residue, still not deleted this slice.
+
+P007: `@/` now falls back to repo-root utils/ and hooks/ after src/. Home page was red on localhost:4000 until this fallback.
+
+P008: SSR 500s were resolve.alias `@` → src; explicit `@/utils` and `@/hooks` point at repo-root folders the pages already import.
+
+P009: SSR loads every page.jsx; `@/components` (and any other root web folders found) now resolve at repo root.
