@@ -13,5 +13,11 @@ declare module 'npm:stripe' {
 }
 declare module '@auth/create/react' {
 	import { SessionProvider } from '@auth/react';
+	export const SessionContext: import('react').Context<unknown>;
 	export { SessionProvider };
+	export function useSession(): {
+		data: unknown;
+		status: 'authenticated' | 'unauthenticated' | 'loading';
+		update?: (data?: unknown) => Promise<unknown>;
+	};
 }

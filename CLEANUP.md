@@ -31,3 +31,5 @@ P007: `@/` now falls back to repo-root utils/ and hooks/ after src/. Home page w
 P008: SSR 500s were resolve.alias `@` → src; explicit `@/utils` and `@/hooks` point at repo-root folders the pages already import.
 
 P009: SSR loads every page.jsx; `@/components` (and any other root web folders found) now resolve at repo root.
+
+P010: paint blocked by host fetch + empty SSR body on stamp routes. ClientOnly dropped the body; SoftSession treats a failed session as signed-out; trust/privacy/terms skip the layout wrapper; Font Awesome kit leftover disabled. Console `polyfills.js` Failed to fetch matches the blocked insights host (ignored) and/or `/api/auth/session` — neither may blank the stamp pages.

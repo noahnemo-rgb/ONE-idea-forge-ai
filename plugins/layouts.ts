@@ -47,6 +47,10 @@ export function layoutWrapperPlugin(userOpts: HierarchicalLayoutOptions = {}): P
 
     /* ——— turn any   src/foo/bar/page.tsx   into a wrapper ——— */
     async transform(code, id) {
+      const normalized = normalizePath(id);
+      if (/\/(trust|privacy|terms|legal)\/page\.jsx$/.test(normalized)) {
+        return null;
+      }
       if (
         opts.pagePattern.test(id) &&
         !id.includes(NO_LAYOUT_QUERY) // avoid wrapping the already wrapped page
