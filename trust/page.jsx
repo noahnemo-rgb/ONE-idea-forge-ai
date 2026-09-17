@@ -53,6 +53,10 @@ export default function TrustPage() {
             Choosing a guest does not make the guest into this product, and does
             not make this product into the guest.
           </p>
+          <p className="mt-3">
+            Guest: Idea Forge Niche Scout via OpenAI-compatible harness.
+            This is a session tool. It does not fuse identities.
+          </p>
         </section>
 
         <section>
