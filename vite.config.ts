@@ -76,6 +76,16 @@ export default defineConfig({
     dedupe: ['react', 'react-dom'],
   },
   clearScreen: false,
+  // P012 — SSR bundle is Node (Hono + top-level await).
+  ssr: {
+    target: 'node',
+  },
+  esbuild: {
+    target: 'node20',
+  },
+  build: {
+    target: 'esnext',
+  },
   server: {
     allowedHosts: true,
     host: '0.0.0.0',
