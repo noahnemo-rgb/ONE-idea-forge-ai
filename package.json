@@ -1,9 +1,11 @@
 {
-	"name": "web",
+	"name": "idea-forge",
 	"private": true,
 	"type": "module",
 	"scripts": {
 		"dev": "react-router dev",
+		"build": "react-router build",
+		"start": "react-router-serve ./build/server/index.js",
 		"typecheck": "react-router typegen && tsc --noEmit"
 	},
 	"dependencies": {
@@ -94,5 +96,8 @@
 	},
 	"overrides": {
 		"next-themes": "^0.3.0"
+	},
+	"engines": {
+		"node": ">=20"
 	}
 }

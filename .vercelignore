@@ -1,0 +1,16 @@
+# Host residue from the Anything / Expo export — not the web preview
+patches/
+.expo/
+*.orig
+.cursor/
+test/
+ios/
+android/
+
+# Local secrets and noise
+.env
+.env.*
+!.env.example
+*.log
+node_modules/
+.DS_Store
