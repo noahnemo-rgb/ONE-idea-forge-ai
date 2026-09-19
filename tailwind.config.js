@@ -1,5 +1,12 @@
 module.exports = {
-	content: ['./src/**/*.{js,ts,jsx,tsx}'],
+	content: [
+		'./page.jsx',
+		'./root.tsx',
+		'./**/page.jsx',
+		'./components/**/*.{js,jsx,ts,tsx}',
+		'./utils/**/*.{js,jsx}',
+		'./src/**/*.{js,ts,jsx,tsx}',
+	],
 	theme: {
 		fontFamily: {
 			sans: ['Inter', 'sans-serif'],
