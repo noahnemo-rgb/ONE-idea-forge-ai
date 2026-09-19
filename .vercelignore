@@ -7,6 +7,9 @@ test/
 ios/
 android/
 
+# Pour 1 — Hobby 12-function cap; 26 api routes stay off Vercel
+api/
+
 # Local secrets and noise
 .env
 .env.*

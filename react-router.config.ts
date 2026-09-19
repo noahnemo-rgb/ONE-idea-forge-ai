@@ -1,8 +1,9 @@
 import type { Config } from '@react-router/dev/config';
 
+const onVercel = process.env.VERCEL === '1';
+
 export default {
-	// P006 — web root.tsx lives at repo root; src/app is the native surface
 	appDirectory: '.',
-	ssr: true,
-	prerender: ['/*?'],
+	ssr: onVercel ? false : true,
+	prerender: onVercel ? ['/', '/trust', '/privacy', '/terms'] : [],
 } satisfies Config;
