@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { forgeWithPuter } from "@/utils/puterForge";
 
 export function useResultsData() {
   const [ideas, setIdeas] = useState([]);
@@ -43,6 +44,15 @@ export function useResultsData() {
   const fetchIdeas = async (prompt, trending, mode) => {
     try {
       setLoading(true);
+      try {
+        const idea = await forgeWithPuter(prompt, mode);
+        setIdeas([idea]);
+        setError(null);
+        return;
+      } catch (puterErr) {
+        console.warn("Puter bellows dark", puterErr);
+      }
+
       const response = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
