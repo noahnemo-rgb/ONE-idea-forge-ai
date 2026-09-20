@@ -288,27 +288,44 @@ export default function HomePage() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-12 max-w-3xl mx-auto text-left">
             {[
-              { icon: Zap, title: "Spark", line: "The first strike. Any idea." },
-              { icon: Wind, title: "Bellows", line: "Named guests. Dated window." },
-              { icon: Hammer, title: "Forge", line: "Hit, cut, refuse, keep." },
-              { icon: Flame, title: "Innovate", line: "Yes ships. No is data." },
-            ].map((b) => (
-              <div key={b.title} className="bg-white/5 border border-white/10 rounded-2xl p-4">
+              { icon: Zap, title: "Spark", line: "The first strike. Any idea.", act: "spark" },
+              { icon: Wind, title: "Bellows", line: "Named guests. Dated window.", act: null },
+              { icon: Hammer, title: "Forge", line: "Hit, cut, refuse, keep.", act: "forge" },
+              { icon: Flame, title: "Innovate", line: "Yes ships. No is data.", act: null },
+            ].map((b) => {
+              const live = b.act === "spark" || b.act === "forge";
+              const Tag = live ? "button" : "div";
+              return (
+              <Tag
+                key={b.title}
+                type={live ? "button" : undefined}
+                onClick={
+                  b.act === "spark"
+                    ? () => document.getElementById("idea-seed")?.focus()
+                    : b.act === "forge"
+                      ? () => document.getElementById("forge-form")?.requestSubmit()
+                      : undefined
+                }
+                className={`bg-white/5 border border-white/10 rounded-2xl p-4 text-left ${live ? "hover:border-[#6855FF]/50 hover:bg-white/[0.07] cursor-pointer" : ""}`}
+              >
                 <b.icon size={16} className="text-[#6855FF] mb-2" />
                 <div className="text-sm font-bold tracking-wide">{b.title}</div>
                 <div className="text-xs text-white/40 mt-1 leading-relaxed">{b.line}</div>
-              </div>
-            ))}
+              </Tag>
+              );
+            })}
           </div>
 
 
         {/* Input Area */}
         <form
+          id="forge-form"
           onSubmit={handleGenerate}
           className="relative max-w-2xl mx-auto mb-12"
         >
           <div className="bg-[#1A1425] border border-white/10 rounded-3xl p-2 shadow-2xl focus-within:border-[#6855FF]/50 transition-all">
             <textarea
+              id="idea-seed"
               rows={3}
               placeholder="Enter a seed idea, niche, or problem you want to solve..."
               className="w-full bg-transparent border-none focus:ring-0 text-lg p-4 resize-none placeholder:text-white/20"
