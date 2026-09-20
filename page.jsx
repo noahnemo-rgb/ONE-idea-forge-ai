@@ -17,6 +17,9 @@ import {
   X,
   BarChart3,
   Cookie,
+  Hammer,
+  Flame,
+  Wind,
 } from "lucide-react";
 import useUser from "@/utils/useUser";
 import { useQuery } from "@tanstack/react-query";
@@ -282,6 +285,22 @@ export default function HomePage() {
           models. Validated with market trends, monetization strategies, and
           technical specs.
         </p>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-12 max-w-3xl mx-auto text-left">
+            {[
+              { icon: Zap, title: "Spark", line: "The first strike. Any idea." },
+              { icon: Wind, title: "Bellows", line: "Named guests. Dated window." },
+              { icon: Hammer, title: "Forge", line: "Hit, cut, refuse, keep." },
+              { icon: Flame, title: "Innovate", line: "Yes ships. No is data." },
+            ].map((b) => (
+              <div key={b.title} className="bg-white/5 border border-white/10 rounded-2xl p-4">
+                <b.icon size={16} className="text-[#6855FF] mb-2" />
+                <div className="text-sm font-bold tracking-wide">{b.title}</div>
+                <div className="text-xs text-white/40 mt-1 leading-relaxed">{b.line}</div>
+              </div>
+            ))}
+          </div>
+
 
         {/* Input Area */}
         <form
