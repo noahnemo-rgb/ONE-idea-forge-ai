@@ -20,7 +20,6 @@ import {
 } from "lucide-react";
 import useUser from "@/utils/useUser";
 import { useQuery } from "@tanstack/react-query";
-import OneColophonFooter from "@/components/OneColophonFooter";
 
 export default function HomePage() {
   const { data: authUser, loading: authLoading } = useUser();
@@ -528,7 +527,6 @@ export default function HomePage() {
         </div>
       )}
 
-      <OneColophonFooter />
     </div>
   );
 }
