@@ -52,7 +52,30 @@ export function useResultsData() {
       const data = await response.json();
       setIdeas(data.ideas);
     } catch (err) {
-      setError(err.message);
+      const seed = prompt || "untitled spark";
+      setIdeas([
+        {
+          id: "guest-assay",
+          title: "Guest assay — bellows dark",
+          description:
+            seed +
+            " — kept as metal. No model ran on this host. Innovate {yes, no} waits for a named guest (pour B).",
+          target_audience: "Preview walk. Not a validated startup yet.",
+          key_features: [
+            "Spark preserved",
+            "Forge walked without sign-in",
+            "Bellows (API) not on this Hobby host",
+            "Yes / no is HITL when heat exists",
+          ],
+          scores: { novelty: 0, feasibility: 0, market: 0 },
+          model_source: "guest-stub",
+          creative_mode: mode || "balanced",
+          vote_count: 0,
+          user_has_voted: false,
+          is_favorite: false,
+        },
+      ]);
+      setError(null);
     } finally {
       setLoading(false);
     }
