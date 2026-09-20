@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import useUser from "@/utils/useUser";
 import { useQuery } from "@tanstack/react-query";
+import OneColophonFooter from "@/components/OneColophonFooter";
 
 export default function HomePage() {
   const { data: authUser, loading: authLoading } = useUser();
@@ -527,39 +528,7 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Footer */}
-      <footer className="border-t border-white/10 py-12 px-6 text-center">
-        <div className="flex justify-center gap-6 mb-6">
-          <a
-            href="/privacy"
-            className="text-white/40 hover:text-white transition-colors text-sm"
-          >
-            Privacy
-          </a>
-          <a
-            href="/terms"
-            className="text-white/40 hover:text-white transition-colors text-sm"
-          >
-            Terms
-          </a>
-          <a
-            href="/cookie-policy"
-            className="text-white/40 hover:text-white transition-colors text-sm flex items-center gap-1"
-          >
-            <Cookie size={14} />
-            Cookies
-          </a>
-          <a
-            href="/accessibility"
-            className="text-white/40 hover:text-white transition-colors text-sm"
-          >
-            Accessibility
-          </a>
-        </div>
-        <p className="text-white/40 text-sm">
-          © 2025 IdeaForge. Built for builders.
-        </p>
-      </footer>
+      <OneColophonFooter />
     </div>
   );
 }
