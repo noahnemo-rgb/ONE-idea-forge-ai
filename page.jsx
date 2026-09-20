@@ -182,12 +182,7 @@ export default function HomePage() {
     e.preventDefault();
     if (!prompt.trim()) return;
 
-    if (!authUser) {
-      window.location.href = "/account/signin";
-      return;
-    }
-
-    if (!isPro && credits <= 0) {
+    if (authUser && !isPro && credits <= 0) {
       window.location.href = "/settings?upgrade=true";
       return;
     }
