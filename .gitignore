@@ -7,3 +7,4 @@ build/
 .expo/
 *.log
 .react-router/
+.heat/
