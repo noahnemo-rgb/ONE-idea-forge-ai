@@ -1,0 +1,23 @@
+{
+  "product": "idea-forge",
+  "note": "Example only. Never commit real keys. Slots may be empty.",
+  "daily_sip_cap": 3,
+  "visitor_puter": false,
+  "order": [
+    { "id": "OPENROUTER_DONOR_01", "kind": "openrouter", "label": "coat-01" },
+    { "id": "OPENROUTER_DONOR_02", "kind": "openrouter", "label": "coat-02" },
+    { "id": "OPENROUTER_DONOR_03", "kind": "openrouter", "label": "coat-03" },
+    { "id": "OPENROUTER_DONOR_04", "kind": "openrouter", "label": "coat-04" },
+    { "id": "OPENROUTER_DONOR_05", "kind": "openrouter", "label": "coat-05" },
+    { "id": "OPENROUTER_DONOR_06", "kind": "openrouter", "label": "coat-06" },
+    { "id": "OPENROUTER_DONOR_07", "kind": "openrouter", "label": "coat-07" },
+    { "id": "OPENROUTER_DONOR_08", "kind": "openrouter", "label": "coat-08" },
+    { "id": "OPENROUTER_DONOR_09", "kind": "openrouter", "label": "coat-09" },
+    { "id": "OPENROUTER_DONOR_10", "kind": "openrouter", "label": "coat-10" }
+  ],
+  "puter_adapter": {
+    "status": "documented-not-wired",
+    "env_pattern": "PUTER_DONOR_01 … PUTER_DONOR_10",
+    "visitor_init_authToken": false
+  }
+}
