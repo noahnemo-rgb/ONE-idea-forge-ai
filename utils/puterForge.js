@@ -1,7 +1,10 @@
+import { FORGE_VISITOR_PUTER } from "./heat/flags.js";
+
 const FREE_CAP = 3;
 const STRIKE_KEY = "ideaforge_free_strikes";
 
 export function remainingFreeStrikes() {
+  if (!FORGE_VISITOR_PUTER) return 0;
   if (typeof window === "undefined") return FREE_CAP;
   const n = Number(sessionStorage.getItem(STRIKE_KEY) || "0");
   return Math.max(0, FREE_CAP - n);
@@ -13,6 +16,7 @@ function bumpStrike() {
 }
 
 export function loadPuter() {
+  if (!FORGE_VISITOR_PUTER) return Promise.reject(new Error("gift-spent"));
   return new Promise((resolve, reject) => {
     if (typeof window === "undefined") return reject(new Error("no window"));
     if (window.puter?.ai?.chat) return resolve(window.puter);
@@ -56,6 +60,7 @@ function parseIdea(text, prompt, mode) {
 }
 
 export async function forgeWithPuter(prompt, mode) {
+  if (!FORGE_VISITOR_PUTER) throw new Error("gift-spent");
   if (remainingFreeStrikes() <= 0) {
     throw new Error("Free strikes used. Upgrade, bring your own key, or stop.");
   }
