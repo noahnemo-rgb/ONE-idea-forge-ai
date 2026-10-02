@@ -29,7 +29,7 @@ export default function SignInPage() {
         redirect: true,
       });
     } catch (err) {
-      setError("Invalid email or password. Please try again.");
+      setError(err.message || "Invalid email or password. Please try again.");
       setLoading(false);
     }
   };
@@ -115,7 +115,13 @@ export default function SignInPage() {
           </div>
 
           <button
-            onClick={() => signInWithGoogle({ callbackUrl: "/" })}
+            onClick={async () => {
+              try {
+                await signInWithGoogle({ callbackUrl: "/" });
+              } catch (err) {
+                setError(err.message || "Google sign-in is not activated. Use email and password.");
+              }
+            }}
             className="w-full bg-white/5 hover:bg-white/10 border border-white/10 py-4 rounded-2xl font-semibold flex items-center justify-center gap-3 transition-all"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">

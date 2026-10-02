@@ -7,8 +7,16 @@ test/
 ios/
 android/
 
-# Pour 1 — Hobby 12-function cap; 26 api routes stay off Vercel
-api/
+# Legacy route files stay in git. Vercel runs one catch-all: api/[...path].js
+api/auth/
+api/generate/
+api/ideas/
+api/research/
+api/stripe/
+api/trends/
+api/user/
+api/utils/
+api/vitest.config.ts
 
 # Local secrets and noise
 .env

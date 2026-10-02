@@ -36,6 +36,11 @@ export default defineConfig({
     reactRouterHonoServer({
       serverEntryPoint: './server/index.ts',
       runtime: 'node',
+      // appDirectory is "." so the default dev exclude misses source files and
+      // the catch-all route returns HTML for /root.tsx. Keep /api on Hono.
+      dev: {
+        exclude: [/^\/(?!api\/).+\.[a-zA-Z0-9]+(\?.*)?$/],
+      },
     }),
     babel({
       include: ['src/**/*.{js,jsx,ts,tsx}'], // or RegExp: /src\/.*\.[tj]sx?$/
@@ -68,6 +73,7 @@ export default defineConfig({
       'npm:stripe': 'stripe',
       '@auth/create/react': '@hono/auth-js/react',
       '@auth/create': path.resolve(__dirname, './src/auth/create.js'),
+      '@heyputer/puter.js': path.resolve(__dirname, 'utils/puter-stub.js'),
       '@/utils': path.resolve(__dirname, 'utils'),
       '@/hooks': path.resolve(__dirname, 'hooks'),
       '@/components': path.resolve(__dirname, 'components'),

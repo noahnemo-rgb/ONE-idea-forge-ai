@@ -1,3 +1,5 @@
+import { AiBufferError, createAiClient } from "ai-buffer";
+
 const SYSTEM =
   'You help a human partner assay one idea. Return ONLY JSON: {"title":"","description":"","target_audience":"","key_features":[""],"scores":{"novelty":0,"feasibility":0,"market":0}} Scores 0-10. Concrete. Do not treat the human as a meter or the model as a tool.';
 
@@ -32,27 +34,27 @@ function parseIdea(text, prompt, mode) {
 }
 
 export async function sipOpenRouter({ apiKey, prompt, mode }) {
-  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "openai/gpt-4o-mini",
-      messages: [
-        { role: "system", content: SYSTEM },
-        {
-          role: "user",
-          content: "Creative mode: " + (mode || "balanced") + ". Seed: " + prompt,
-        },
-      ],
-    }),
+  const ai = createAiClient({
+    provider: "openrouter",
+    getApiKey: () => apiKey,
+    model: "openai/gpt-4o-mini",
+    appName: "Idea Forge",
+    siteUrl: "https://one-idea-forge-ai.vercel.app",
   });
-  if (res.status === 401 || res.status === 402 || res.status === 429 || !res.ok) {
-    exhaust(res.status);
+  try {
+    const text = await ai.streamChat({
+      systemPrompt: SYSTEM,
+      message: "Creative mode: " + (mode || "balanced") + ". Seed: " + prompt,
+    });
+    return parseIdea(text, prompt, mode);
+  } catch (error) {
+    if (error instanceof AiBufferError) {
+      if (error.code === "payment_required") exhaust(402);
+      if (error.code === "rate_limited") exhaust(429);
+      if (error.code === "missing_key") exhaust(401);
+    }
+    const status = error?.status;
+    if (status === 401 || status === 402 || status === 429 || status) exhaust(status);
+    exhaust(500);
   }
-  const body = await res.json();
-  const text = body?.choices?.[0]?.message?.content || "";
-  return parseIdea(text, prompt, mode);
 }

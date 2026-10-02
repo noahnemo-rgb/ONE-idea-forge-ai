@@ -15,6 +15,7 @@ import { serializeError } from 'serialize-error';
 import ws from 'ws';
 import NeonAdapter from './adapter';
 import { getHTMLForErrorPage } from './get-html-for-error-page';
+import { attachForge } from './forge/hono-mount';
 import { isAuthAction } from './is-auth-action';
 import { API_BASENAME, api } from './route-builder';
 neonConfig.webSocketConstructor = ws;
@@ -217,6 +218,8 @@ if (process.env.AUTH_SECRET) {
     }))
   );
 }
+
+attachForge(app);
 
 app.use('/api/auth/*', async (c, next) => {
   if (isAuthAction(c.req.path)) {
