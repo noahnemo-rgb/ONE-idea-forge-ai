@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, Send, Sparkles } from "lucide-react";
 import { createAiClient } from "ai-buffer";
+import { createKeyedRouter } from "@/utils/heat/forgeRouter";
 import { FORGE_VISITOR_PUTER } from "@/utils/heat/flags";
 import { loadPuter } from "@/utils/puterForge";
 import useUser from "@/utils/useUser";
@@ -64,13 +65,12 @@ export default function ChatPage() {
   const askKey = async (message, history) => {
     const apiKey = key.trim();
     if (!apiKey) return null;
-    const ai = createAiClient({
-      provider: "openrouter",
-      getApiKey: () => apiKey,
+    const router = createKeyedRouter({
+      apiKey,
       appName: "Idea Forge",
       siteUrl: window.location.origin,
     });
-    return ai.streamChat({ message, history, systemPrompt: CHAT_PROMPT });
+    return router.streamChat({ message, history, systemPrompt: CHAT_PROMPT });
   };
 
   const onSubmit = async (event) => {
@@ -133,7 +133,7 @@ export default function ChatPage() {
           <div>
             <h1 className="text-3xl font-bold">Chat</h1>
             <p className="text-white/50 text-sm">
-              Puter in the browser, your own OpenRouter key, or the server key if one is set.
+              Puter in the browser first. A key saved here tries Space Bunny Alpha, then your OpenRouter model. The server key is the last stop.
             </p>
           </div>
         </div>

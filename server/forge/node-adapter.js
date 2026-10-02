@@ -1,6 +1,7 @@
 import { handleForge } from "./handle.js";
 import { openNeonStore } from "./neon-store.js";
-import { AiBufferError, createAiClient } from "ai-buffer";
+import { AiBufferError } from "ai-buffer";
+import { createKeyedRouter } from "../../utils/heat/forgeRouter.js";
 
 async function readRaw(req) {
   if (typeof req.body === "string") return req.body;
@@ -12,16 +13,15 @@ async function readRaw(req) {
 }
 
 export async function completeChat({ apiKey, systemPrompt, message, history }) {
-  const ai = createAiClient({
-    provider: "openrouter",
-    getApiKey: () => apiKey,
+  const router = createKeyedRouter({
+    apiKey,
     appName: "Idea Forge",
     siteUrl: process.env.APP_ORIGIN || "https://one-idea-forge-ai.vercel.app",
     model: process.env.OPENROUTER_MODEL,
     timeoutMs: 55_000,
   });
   try {
-    return await ai.streamChat({ message, systemPrompt, history });
+    return await router.streamChat({ message, systemPrompt, history });
   } catch (error) {
     if (error instanceof AiBufferError) {
       const wrapped = new Error(error.message);
