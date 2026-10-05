@@ -48,6 +48,26 @@ export function useResultsData() {
         const idea = await forgeWithPuter(prompt, mode);
         setIdeas([idea]);
         setError(null);
+        try {
+          await fetch("/api/ideas", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+              action: "save",
+              prompt,
+              title: idea.title,
+              description: idea.description,
+              target_audience: idea.target_audience,
+              key_features: idea.key_features,
+              scores: idea.scores,
+              model_source: idea.model_source,
+              creative_mode: idea.creative_mode,
+            }),
+          });
+        } catch {
+          // Guests and a quiet database still see the assay.
+        }
         return;
       } catch (puterErr) {
         console.warn("Puter bellows dark", puterErr);

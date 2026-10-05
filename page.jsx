@@ -222,6 +222,18 @@ export default function HomePage() {
         </div>
         <div className="flex items-center gap-6">
           <a
+            href="/community"
+            className="text-sm text-white/70 hover:text-white transition-colors"
+          >
+            Community
+          </a>
+          <a
+            href="/chat"
+            className="text-sm text-white/70 hover:text-white transition-colors"
+          >
+            Chat
+          </a>
+          <a
             href="/history"
             className="text-sm text-white/70 hover:text-white transition-colors"
           >

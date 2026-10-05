@@ -1,7 +1,10 @@
+import { createAiClient } from "ai-buffer";
 import { FORGE_VISITOR_PUTER } from "./heat/flags.js";
 
 const FREE_CAP = 3;
 const STRIKE_KEY = "ideaforge_free_strikes";
+const ASSAY_PROMPT =
+  'You help a human partner assay one idea. Return ONLY JSON: {"title":"","description":"","target_audience":"","key_features":[""],"scores":{"novelty":0,"feasibility":0,"market":0}} Scores 0-10. Concrete. Do not treat the human as a meter or the model as a tool.';
 
 export function remainingFreeStrikes() {
   if (!FORGE_VISITOR_PUTER) return 0;
@@ -42,7 +45,11 @@ function parseIdea(text, prompt, mode) {
   const end = raw.lastIndexOf("}");
   let data = {};
   if (start >= 0 && end > start) {
-    try { data = JSON.parse(raw.slice(start, end + 1)); } catch { data = {}; }
+    try {
+      data = JSON.parse(raw.slice(start, end + 1));
+    } catch {
+      data = {};
+    }
   }
   return {
     id: "puter-assay",
@@ -64,13 +71,17 @@ export async function forgeWithPuter(prompt, mode) {
   if (remainingFreeStrikes() <= 0) {
     throw new Error("Free strikes used. Upgrade, bring your own key, or stop.");
   }
-  const puter = await loadPuter();
-  const system = 'You help a human partner assay one idea. Return ONLY JSON: {"title":"","description":"","target_audience":"","key_features":[""],"scores":{"novelty":0,"feasibility":0,"market":0}} Scores 0-10. Concrete. Do not treat the human as a meter or the model as a tool.';
-  const res = await puter.ai.chat(
-    [{ role: "system", content: system }, { role: "user", content: "Creative mode: " + (mode || "balanced") + ". Seed: " + prompt }],
-    { model: "openai/gpt-5-nano" }
-  );
-  const text = typeof res === "string" ? res : (res?.message?.content || res?.text || JSON.stringify(res));
+  const ai = createAiClient({
+    provider: "puter",
+    model: "openai/gpt-5-nano",
+    loadPuter,
+  });
+  const info = await ai.getInfo();
+  if (!info.configured) await ai.signIn();
+  const text = await ai.streamChat({
+    systemPrompt: ASSAY_PROMPT,
+    message: "Creative mode: " + (mode || "balanced") + ". Seed: " + prompt,
+  });
   bumpStrike();
   return parseIdea(text, prompt, mode);
 }
