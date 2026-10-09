@@ -1,3 +1,4 @@
+import { ownerKeyForRequest } from "./ai-proxy.js";
 import { hashPassword, verifyPassword } from "./password.js";
 import {
   clearSessionCookie,
@@ -267,17 +268,15 @@ export async function handleForge(request) {
 
   if (method === "POST" && route === "/chat") {
     if (!session.user) return json(401, { error: "Unauthorized" });
-    const apiKey = String(body.apiKey || env.OPENROUTER_API_KEY || "").trim();
-    if (!apiKey) {
-      return json(503, {
-        error: "Add an OpenRouter key on this device, or set OPENROUTER_API_KEY on the server. The website can also use Puter.",
-        code: "missing_key",
-      });
-    }
+    const owned = ownerKeyForRequest(body, env);
+    if (!owned.ok) return json(owned.status, { error: owned.error, code: owned.code });
     const message = String(body.message || "").trim();
     if (!message) return json(400, { error: "Message is empty.", code: "empty_message" });
     const ran = await runModel(completeChat, {
-      apiKey,
+      mode: owned.mode,
+      provider: owned.provider,
+      model: owned.model,
+      env,
       systemPrompt: body.systemPrompt || CHAT_PROMPT,
       message,
       history: Array.isArray(body.history) ? body.history : [],
@@ -289,13 +288,8 @@ export async function handleForge(request) {
   }
 
   if (method === "POST" && route === "/generate") {
-    const apiKey = String(body.apiKey || env.OPENROUTER_API_KEY || "").trim();
-    if (!apiKey) {
-      return json(503, {
-        error: "No model key is configured. Sign in to Puter in the browser, or set OPENROUTER_API_KEY.",
-        code: "missing_key",
-      });
-    }
+    const owned = ownerKeyForRequest(body, env);
+    if (!owned.ok) return json(owned.status, { error: owned.error, code: owned.code });
     if (session.user) {
       const spent = await store.spendCredit(session.user);
       if (!spent.ok) return json(403, { error: "Daily limit reached", limitReached: true });
@@ -303,7 +297,10 @@ export async function handleForge(request) {
     const prompt = String(body.prompt || "").trim();
     if (!prompt) return json(400, { error: "Prompt is required" });
     const ran = await runModel(completeChat, {
-      apiKey,
+      mode: owned.mode,
+      provider: owned.provider,
+      model: owned.model,
+      env,
       systemPrompt: ASSAY_PROMPT,
       message: `Creative mode: ${body.creativeMode || "balanced"}. Seed: ${prompt}`,
       history: [],

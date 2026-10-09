@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -14,7 +14,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import {
   ArrowLeft,
-  Key,
   CreditCard,
   Shield,
   LogOut,
@@ -37,6 +36,7 @@ import { useAuth } from "@/utils/auth/useAuth";
 import useUser from "@/utils/auth/useUser";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useQuery } from "@tanstack/react-query";
+import { useAiBufferDashboard } from "../../utils/useAiBufferDashboard.js";
 import Purchases from "react-native-purchases";
 import { Platform } from "react-native";
 
@@ -59,18 +59,10 @@ export default function SettingsScreen() {
     isRestoring,
   } = useSubscription();
 
-  const [apiKeys, setApiKeys] = useState({
-    openai: "",
-    anthropic: "",
-    google: "",
-  });
+  const { rows, choose, commitModel } = useAiBufferDashboard();
 
   const handleUpgrade = async () => {
     await purchase();
-  };
-
-  const handleSaveKeys = () => {
-    alert("API Keys saved securely!");
   };
 
   const handleShare = () => {
@@ -575,96 +567,53 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* API Keys Section */}
         <View style={{ marginBottom: 32 }}>
           <Text
             style={{
               fontSize: 14,
               fontWeight: "600",
               color: theme.colors.textSecondary,
-              textTransform: "uppercase",
               letterSpacing: 1,
               marginBottom: 16,
             }}
           >
-            Custom API Keys
+            ai-buffer
           </Text>
-          <View
-            style={{
-              backgroundColor: theme.colors.surface,
-              borderRadius: 16,
-              padding: 20,
-              borderWidth: 1,
-              borderColor: theme.colors.border,
-              gap: 16,
-            }}
-          >
-            <View>
-              <Text
+          <View style={{ gap: 12 }}>
+            {rows.map((row) => (
+              <View
+                key={row.id}
                 style={{
-                  fontSize: 14,
-                  color: theme.colors.text,
-                  marginBottom: 8,
-                }}
-              >
-                OpenAI API Key
-              </Text>
-              <TextInput
-                secureTextEntry
-                placeholder="sk-..."
-                placeholderTextColor={theme.colors.placeholder}
-                style={{
-                  backgroundColor: theme.colors.background,
-                  borderRadius: 10,
-                  padding: 12,
-                  color: theme.colors.text,
+                  backgroundColor: theme.colors.surface,
+                  borderRadius: 16,
+                  padding: 16,
                   borderWidth: 1,
                   borderColor: theme.colors.border,
-                }}
-                value={apiKeys.openai}
-                onChangeText={(v) => setApiKeys({ ...apiKeys, openai: v })}
-              />
-            </View>
-            <View>
-              <Text
-                style={{
-                  fontSize: 14,
-                  color: theme.colors.text,
-                  marginBottom: 8,
+                  gap: 8,
                 }}
               >
-                Anthropic API Key
-              </Text>
-              <TextInput
-                secureTextEntry
-                placeholder="sk-ant-..."
-                placeholderTextColor={theme.colors.placeholder}
-                style={{
-                  backgroundColor: theme.colors.background,
-                  borderRadius: 10,
-                  padding: 12,
-                  color: theme.colors.text,
-                  borderWidth: 1,
-                  borderColor: theme.colors.border,
-                }}
-                value={apiKeys.anthropic}
-                onChangeText={(v) => setApiKeys({ ...apiKeys, anthropic: v })}
-              />
-            </View>
-            <TouchableOpacity
-              onPress={handleSaveKeys}
-              style={{
-                backgroundColor: theme.colors.primary,
-                paddingVertical: 14,
-                borderRadius: 12,
-                alignItems: "center",
-                marginTop: 8,
-              }}
-            >
-              <Text style={{ color: "white", fontWeight: "600" }}>
-                Save Keys
-              </Text>
-            </TouchableOpacity>
+                <TouchableOpacity onPress={() => choose(row.id)}>
+                  <Text style={{ color: theme.colors.text, fontWeight: "600" }}>{row.label}</Text>
+                </TouchableOpacity>
+                <Text style={{ color: theme.colors.textSecondary }}>{row.status}</Text>
+                <Text style={{ color: theme.colors.textSecondary }}>{row.keyHint}</Text>
+                <Text style={{ color: theme.colors.text }}>{row.activeLabel}</Text>
+                <Text style={{ color: theme.colors.textSecondary }}>{row.modelLabel}</Text>
+                <TextInput
+                  key={`${row.id}:${row.model}`}
+                  defaultValue={row.model}
+                  onEndEditing={(event) => commitModel(row.id, event.nativeEvent.text)}
+                  style={{
+                    backgroundColor: theme.colors.background,
+                    borderRadius: 10,
+                    padding: 12,
+                    color: theme.colors.text,
+                    borderWidth: 1,
+                    borderColor: theme.colors.border,
+                  }}
+                />
+              </View>
+            ))}
           </View>
         </View>
 

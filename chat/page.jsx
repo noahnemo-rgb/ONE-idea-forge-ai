@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { ArrowLeft, Send, Sparkles } from "lucide-react";
-import { createAiClient } from "ai-buffer";
-import { createKeyedRouter } from "@/utils/heat/forgeRouter";
+import { createAiClient, defaultModelFor } from "ai-buffer";
+import { AiBufferDashboard } from "@/utils/AiBufferDashboard";
+import { browserSelectionStore } from "@/utils/aiBufferSelection";
+import { canFailover, streamFromProxy } from "@/utils/aiProxyClient";
 import { FORGE_VISITOR_PUTER } from "@/utils/heat/flags";
 import { loadPuter } from "@/utils/puterForge";
 import useUser from "@/utils/useUser";
 
-const KEY_NAME = "ideaforge_openrouter_key";
 const CHAT_PROMPT =
   "You are the Idea Forge assistant. Help the partner think through one business idea. Be concrete and short. When you suggest a next step, say whether the human or a named helper does it.";
 
@@ -25,13 +26,8 @@ export default function ChatPage() {
   const { data: user } = useUser();
   const [messages, setMessages] = useState([]);
   const [draft, setDraft] = useState("");
-  const [key, setKey] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") setKey(localStorage.getItem(KEY_NAME) || "");
-  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -41,17 +37,11 @@ export default function ChatPage() {
       .catch(() => {});
   }, [user]);
 
-  const saveKey = (value) => {
-    setKey(value);
-    if (value.trim()) localStorage.setItem(KEY_NAME, value.trim());
-    else localStorage.removeItem(KEY_NAME);
-  };
-
-  const askLocal = async (message, history) => {
+  const askLocal = async (message, history, model) => {
     if (FORGE_VISITOR_PUTER) {
       const ai = createAiClient({
         provider: "puter",
-        model: "openai/gpt-5-nano",
+        model: model || defaultModelFor("puter"),
         loadPuter,
         defaultSystemPrompt: CHAT_PROMPT,
       });
@@ -62,15 +52,14 @@ export default function ChatPage() {
     return null;
   };
 
-  const askKey = async (message, history) => {
-    const apiKey = key.trim();
-    if (!apiKey) return null;
-    const router = createKeyedRouter({
-      apiKey,
-      appName: "Idea Forge",
-      siteUrl: window.location.origin,
+  const askProxy = async (message, history, provider, model) => {
+    return streamFromProxy({
+      provider,
+      model,
+      message,
+      history,
+      systemPrompt: CHAT_PROMPT,
     });
-    return router.streamChat({ message, history, systemPrompt: CHAT_PROMPT });
   };
 
   const onSubmit = async (event) => {
@@ -83,32 +72,35 @@ export default function ChatPage() {
     setBusy(true);
     setError(null);
     try {
+      const chosen = await browserSelectionStore().getSelection();
       let reply = null;
-      try {
-        reply = await askLocal(message, history);
-      } catch (puterError) {
-        console.warn("Puter chat unavailable", puterError);
-      }
-      if (!reply) reply = await askKey(message, history);
-      if (reply) {
-        if (user) {
-          await logTurn("user", message);
-          await logTurn("assistant", reply);
+      if (!chosen || chosen.provider === "puter") {
+        try {
+          reply = await askLocal(message, history, chosen?.model);
+        } catch (puterError) {
+          console.warn("Puter chat unavailable", puterError);
+          if (chosen?.provider === "puter") throw new Error("Chat failed.");
         }
-      } else {
-        const response = await fetch("/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ message, history }),
-        });
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(data.error || "Chat is not available yet.");
-        reply = data.reply;
+      }
+      if (!reply && chosen?.provider !== "puter") {
+        const provider = chosen?.provider || "space-bunny";
+        const model = chosen?.model;
+        try {
+          reply = await askProxy(message, history, provider, model);
+        } catch (proxyError) {
+          if (chosen || !canFailover(proxyError)) throw proxyError;
+          reply = await askProxy(message, history, "openrouter", undefined);
+        }
+      }
+      if (!reply) throw new Error("Chat is not available yet.");
+      if (user) {
+        await logTurn("user", message);
+        await logTurn("assistant", reply);
       }
       setMessages((current) => [...current, { role: "assistant", content: reply }]);
     } catch (err) {
-      setError(err.message || "Chat failed.");
+      const message = err?.message === "Chat is not available yet." ? err.message : "Chat failed.";
+      setError(message);
     } finally {
       setBusy(false);
     }
@@ -132,21 +124,9 @@ export default function ChatPage() {
           </div>
           <div>
             <h1 className="text-3xl font-bold">Chat</h1>
-            <p className="text-white/50 text-sm">
-              Puter in the browser first. A key saved here tries Space Bunny Alpha, then your OpenRouter model. The server key is the last stop.
-            </p>
           </div>
         </div>
-        <label className="block text-sm text-white/60 mb-6">
-          OpenRouter key, stored only in this browser
-          <input
-            type="password"
-            value={key}
-            onChange={(event) => saveKey(event.target.value)}
-            placeholder="sk-or-..."
-            className="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-[#6855FF]"
-          />
-        </label>
+        <AiBufferDashboard />
         <div className="space-y-4 mb-6 min-h-48">
           {messages.length === 0 && (
             <p className="text-white/40">Ask about one idea. Sign in if you want the thread saved.</p>

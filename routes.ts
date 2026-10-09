@@ -68,7 +68,10 @@ function generateRoutes(node: Tree): RouteConfigEntry[] {
 			node.path === '' ? `./${node.path}page.jsx` : `./${node.path}/page.jsx`;
 
 		if (node.path === '') {
-			routes.push(index(componentPath));
+			// Root page.jsx is the home screen. The client route entry cannot be
+			// that same file: Vite drops `/page.jsx?__react-router-build-client-route`
+			// from the manifest, and the server build then fails.
+			routes.push(index('./index-route.jsx'));
 		} else {
 			// Handle parameter routes
 			let routePath = node.path;

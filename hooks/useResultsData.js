@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { browserSelectionStore } from "@/utils/aiBufferSelection";
 import { forgeWithPuter } from "@/utils/puterForge";
 
 export function useResultsData() {
@@ -44,39 +45,49 @@ export function useResultsData() {
   const fetchIdeas = async (prompt, trending, mode) => {
     try {
       setLoading(true);
-      try {
-        const idea = await forgeWithPuter(prompt, mode);
-        setIdeas([idea]);
-        setError(null);
+      const chosen = await browserSelectionStore().getSelection();
+      const serverProvider = chosen && chosen.provider !== "puter";
+      if (!serverProvider) {
         try {
-          await fetch("/api/ideas", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({
-              action: "save",
-              prompt,
-              title: idea.title,
-              description: idea.description,
-              target_audience: idea.target_audience,
-              key_features: idea.key_features,
-              scores: idea.scores,
-              model_source: idea.model_source,
-              creative_mode: idea.creative_mode,
-            }),
-          });
-        } catch {
-          // Guests and a quiet database still see the assay.
+          const idea = await forgeWithPuter(prompt, mode);
+          setIdeas([idea]);
+          setError(null);
+          try {
+            await fetch("/api/ideas", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              body: JSON.stringify({
+                action: "save",
+                prompt,
+                title: idea.title,
+                description: idea.description,
+                target_audience: idea.target_audience,
+                key_features: idea.key_features,
+                scores: idea.scores,
+                model_source: idea.model_source,
+                creative_mode: idea.creative_mode,
+              }),
+            });
+          } catch {
+            // Guests and a quiet database still see the assay.
+          }
+          return;
+        } catch (puterErr) {
+          console.warn("Puter bellows dark", puterErr);
         }
-        return;
-      } catch (puterErr) {
-        console.warn("Puter bellows dark", puterErr);
       }
 
       const response = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, trending, creativeMode: mode }),
+        credentials: "include",
+        body: JSON.stringify({
+          prompt,
+          trending,
+          creativeMode: mode,
+          ...(serverProvider ? { provider: chosen.provider, model: chosen.model } : {}),
+        }),
       });
       if (!response.ok) throw new Error("Failed to generate ideas");
       const data = await response.json();
