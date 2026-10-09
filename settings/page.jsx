@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { useSubscription } from "@/utils/useSubscription";
 import useUser from "@/utils/useUser";
+import { AiBufferDashboard } from "@/utils/AiBufferDashboard";
 import { useQuery } from "@tanstack/react-query";
 
 export default function SettingsPage() {
@@ -42,23 +43,11 @@ export default function SettingsPage() {
   const user = profileData?.user;
   const credits = user?.credits ?? 0;
 
-  const [apiKeys, setApiKeys] = useState({
-    openai: "",
-    anthropic: "",
-    google: "",
-  });
-  const [saved, setSaved] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
   const [emailSent, setEmailSent] = useState(false);
-
-  const handleSave = (e) => {
-    e.preventDefault();
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
-  };
 
   const handleShare = () => {
     const text = encodeURIComponent(
@@ -343,58 +332,8 @@ export default function SettingsPage() {
             </div>
           </section>
 
-          <section>
-            <h2 className="text-xs font-bold text-white/40 uppercase tracking-widest mb-6">
-              Custom API Keys
-            </h2>
-            <form
-              onSubmit={handleSave}
-              className="bg-[#1A1425] border border-white/10 rounded-3xl p-8 space-y-6"
-            >
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-white/60">
-                  OpenAI API Key
-                </label>
-                <input
-                  type="password"
-                  placeholder="sk-..."
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-[#6855FF]/50 transition-all"
-                  value={apiKeys.openai}
-                  onChange={(e) =>
-                    setApiKeys({ ...apiKeys, openai: e.target.value })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-white/60">
-                  Anthropic API Key
-                </label>
-                <input
-                  type="password"
-                  placeholder="sk-ant-..."
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-[#6855FF]/50 transition-all"
-                  value={apiKeys.anthropic}
-                  onChange={(e) =>
-                    setApiKeys({ ...apiKeys, anthropic: e.target.value })
-                  }
-                />
-              </div>
-              <div className="pt-4 flex items-center justify-between">
-                <p className="text-xs text-white/30 max-w-xs">
-                  Keys are stored securely in your browser's local storage. We
-                  never see or store your keys on our servers.
-                </p>
-                <button
-                  type="submit"
-                  className="bg-white/10 hover:bg-white/20 px-8 py-3 rounded-2xl font-bold transition-all flex items-center gap-2"
-                >
-                  {saved ? (
-                    <CheckCircle2 size={18} className="text-green-400" />
-                  ) : null}
-                  {saved ? "Saved" : "Save Keys"}
-                </button>
-              </div>
-            </form>
+          <section className="bg-[#1A1425] border border-white/10 rounded-3xl p-8">
+            <AiBufferDashboard />
           </section>
 
           <section>

@@ -188,21 +188,48 @@ test("chat reports a missing key and generate saves the assay", async () => {
     method: "POST",
     path: ["chat"],
     headers: { cookie },
-    body: { message: "Hello" },
+    body: { message: "Hello", apiKey: "sk-client-should-not-unlock" },
     env: {},
   });
   assert.equal(missing.status, 503);
   assert.equal(missing.json.code, "missing_key");
+  assert.equal(JSON.stringify(missing.json).includes("sk-client-should-not-unlock"), false);
 
+  const clientKey = await call(store, {
+    method: "POST",
+    path: ["generate"],
+    headers: { cookie },
+    body: { prompt: "a quieter inbox", apiKey: "sk-client-should-not-unlock" },
+    env: {},
+    completeChat: async () => {
+      throw new Error("client key must not reach the model");
+    },
+  });
+  assert.equal(clientKey.status, 503);
+  assert.equal(clientKey.json.code, "missing_key");
+
+  let seen;
   const generated = await call(store, {
     method: "POST",
     path: ["generate"],
     headers: { cookie },
-    body: { prompt: "a quieter inbox", apiKey: "test-key" },
-    completeChat: async () => '{"title":"Quiet Inbox","description":"Less noise","target_audience":"Teams"}',
+    body: {
+      prompt: "a quieter inbox",
+      provider: "gemini",
+      model: "gemini-3.8-flash",
+      apiKey: "sk-client-should-not-unlock",
+    },
+    env: { GEMINI_API_KEY: "AIzaSyTESTKEY1234567890abcd" },
+    completeChat: async (input) => {
+      seen = input;
+      return '{"title":"Quiet Inbox","description":"Less noise","target_audience":"Teams"}';
+    },
   });
   assert.equal(generated.status, 200);
   assert.equal(generated.json.ideas[0].title, "Quiet Inbox");
+  assert.equal(seen.provider, "gemini");
+  assert.equal(seen.apiKey, undefined);
+  assert.equal(JSON.stringify(generated.json).includes("AIzaSyTESTKEY1234567890abcd"), false);
   const ideas = await call(store, { method: "GET", path: ["ideas"], headers: { cookie } });
   assert.equal(ideas.json.ideas[0].title, "Quiet Inbox");
 });

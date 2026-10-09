@@ -1,6 +1,7 @@
+import { createAiClient, AiBufferError, readOwnerApiKey } from "ai-buffer";
+import { handleAiBufferNode, requestPath } from "./ai-proxy.js";
 import { handleForge } from "./handle.js";
 import { openNeonStore } from "./neon-store.js";
-import { AiBufferError } from "ai-buffer";
 import { createKeyedRouter } from "../../utils/heat/forgeRouter.js";
 
 async function readRaw(req) {
@@ -12,23 +13,45 @@ async function readRaw(req) {
   return Buffer.concat(chunks).toString("utf8");
 }
 
-export async function completeChat({ apiKey, systemPrompt, message, history }) {
-  const router = createKeyedRouter({
-    apiKey,
-    appName: "Idea Forge",
-    siteUrl: process.env.APP_ORIGIN || "https://one-idea-forge-ai.vercel.app",
-    model: process.env.OPENROUTER_MODEL,
-    timeoutMs: 55_000,
-  });
+function wrapAiError(error) {
+  if (error instanceof AiBufferError) {
+    const wrapped = new Error(error.message);
+    wrapped.code = error.code;
+    throw wrapped;
+  }
+  throw error;
+}
+
+export async function completeChat({ mode, provider, model, systemPrompt, message, history, env = process.env }) {
+  const siteUrl = env.APP_ORIGIN || "https://one-idea-forge-ai.vercel.app";
+  const common = { appName: "Idea Forge", siteUrl, timeoutMs: 55_000 };
   try {
+    if (mode === "provider" && provider && provider !== "openrouter") {
+      const ai = createAiClient({
+        provider,
+        getApiKey: () => readOwnerApiKey(provider, env),
+        model,
+        ...common,
+      });
+      return await ai.streamChat({ message, systemPrompt, history });
+    }
+    if (mode === "provider" && provider === "openrouter") {
+      const ai = createAiClient({
+        provider: "openrouter",
+        getApiKey: () => readOwnerApiKey("openrouter", env),
+        model,
+        ...common,
+      });
+      return await ai.streamChat({ message, systemPrompt, history });
+    }
+    const router = createKeyedRouter({
+      apiKey: readOwnerApiKey("openrouter", env),
+      model: model || env.OPENROUTER_MODEL,
+      ...common,
+    });
     return await router.streamChat({ message, systemPrompt, history });
   } catch (error) {
-    if (error instanceof AiBufferError) {
-      const wrapped = new Error(error.message);
-      wrapped.code = error.code;
-      throw wrapped;
-    }
-    throw error;
+    wrapAiError(error);
   }
 }
 
@@ -39,6 +62,10 @@ function headerValue(headers, name) {
 }
 
 export async function forgeNodeHandler(req, res) {
+  const pathName = requestPath(req);
+  if (pathName === "/api/ai-proxy" || pathName === "/api/ai-buffer/status") {
+    return handleAiBufferNode(req, res);
+  }
   let rawBody = "";
   let body = {};
   if (req.body && typeof req.body === "object" && !Buffer.isBuffer(req.body)) {

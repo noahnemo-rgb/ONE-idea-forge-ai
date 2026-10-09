@@ -1,6 +1,8 @@
 import type { Hono } from "hono";
 import { isAuthAction } from "../is-auth-action";
 // @ts-expect-error Plain JavaScript module.
+import { handleAiBufferRequest } from "./ai-proxy.js";
+// @ts-expect-error Plain JavaScript module.
 import { handleForge } from "./handle.js";
 // @ts-expect-error Plain JavaScript module.
 import { completeChat } from "./node-adapter.js";
@@ -9,8 +11,18 @@ import { openNeonStore } from "./neon-store.js";
 
 export function attachForge(app: Hono): void {
   app.all("/api/*", async (c, next) => {
-    if (isAuthAction(c.req.path)) return next();
     const url = new URL(c.req.url);
+    if (url.pathname === "/api/ai-proxy" || url.pathname === "/api/ai-buffer/status") {
+      const method = c.req.method;
+      const body = method === "GET" || method === "HEAD" ? undefined : await c.req.text();
+      const request = new Request(c.req.url, {
+        method,
+        headers: new Headers(c.req.raw.headers),
+        body,
+      });
+      return handleAiBufferRequest(request);
+    }
+    if (isAuthAction(c.req.path)) return next();
     const rawBody = c.req.method === "GET" || c.req.method === "HEAD" ? "" : await c.req.text();
     let body: Record<string, unknown> = {};
     if (rawBody && (c.req.header("content-type") || "").includes("application/json")) {
