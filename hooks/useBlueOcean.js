@@ -23,7 +23,13 @@ export function useBlueOcean() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setDiveError(data.error || "Blue-ocean dive is not available yet.");
+        const friendly = {
+          database_off: "Blue-ocean dive is a Pro room. It opens when this workshop can save an account. Your seed stays on the card.",
+          sign_in: "Sign in to open the blue-ocean room.",
+          pro_required: "Blue-ocean dive is a Pro room.",
+          missing_key: "Pro is open. Sign in to Puter, or add your OpenRouter key, to run Niche Scout.",
+        };
+        setDiveError(friendly[data.code] || data.error || "Blue-ocean dive is not available yet.");
         return;
       }
       setDiveResult(data);
