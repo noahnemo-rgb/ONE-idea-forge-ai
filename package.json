@@ -8,7 +8,7 @@
 		"start": "react-router-serve ./build/server/index.js",
 		"typecheck": "react-router typegen && tsc --noEmit",
 		"heat:local": "node scripts/heat-local.mjs",
-		"test": "node --test server/forge/handle.test.js utils/heat/donatorSequencer.test.mjs utils/heat/forgeRouter.test.js"
+		"test": "node --test server/forge/handle.test.js utils/heat/donatorSequencer.test.mjs utils/heat/forgeRouter.test.js utils/heat/idealabSeed.test.js"
 	},
 	"dependencies": {
 		"@auth/core": "^0.37.2",

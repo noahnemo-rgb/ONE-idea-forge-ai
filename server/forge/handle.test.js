@@ -207,6 +207,73 @@ test("chat reports a missing key and generate saves the assay", async () => {
   assert.equal(ideas.json.ideas[0].title, "Quiet Inbox");
 });
 
+test("a pasted Idealab seed is stored, and the blue-ocean room is Pro", async () => {
+  const store = createMemoryStore();
+  const created = await call(store, {
+    method: "POST",
+    path: ["account", "signup"],
+    body: { email: "ada@example.com", password: "long-enough" },
+  });
+  const cookie = cookieFrom(created);
+  const source = "https://idealab.ai/ideas/tool-library";
+  const saved = await call(store, {
+    method: "POST",
+    path: ["ideas"],
+    headers: { cookie },
+    body: { action: "save", title: "Tool library", prompt: "neighborhood tools", source_url: source },
+  });
+  assert.equal(saved.status, 200);
+  assert.equal(saved.json.idea.source_url, source);
+
+  const blocked = await call(store, {
+    method: "POST",
+    path: ["research", "blue-ocean"],
+    headers: { cookie },
+    body: { prompt: "neighborhood tools", sourceUrl: source },
+  });
+  assert.equal(blocked.status, 403);
+  assert.equal(blocked.json.code, "pro_required");
+
+  await store.setStripeCustomer(created.json.user.id, "cus_ada");
+  await store.setSubscriptionByCustomer("cus_ada", "pro");
+
+  const quiet = await call(store, {
+    method: "POST",
+    path: ["research", "blue-ocean"],
+    headers: { cookie },
+    body: { prompt: "neighborhood tools", sourceUrl: source },
+    env: {},
+  });
+  assert.equal(quiet.status, 503);
+  assert.equal(quiet.json.code, "missing_key");
+  assert.equal(quiet.json.guest, "Idea Forge Niche Scout");
+
+  let seenMessage = "";
+  const dive = await call(store, {
+    method: "POST",
+    path: ["research", "blue-ocean"],
+    headers: { cookie },
+    body: { prompt: "neighborhood tools", sourceUrl: source, apiKey: "test-key" },
+    completeChat: async (input) => {
+      seenMessage = input.message;
+      return JSON.stringify({
+        niches: [
+          { name: "Evening repair", wedge: "After-work bench", why_open: "Shops close early", citations: [source] },
+          { name: "Borrow desk", wedge: "Loan the tool", why_open: "Buying is the waste", citations: [] },
+          { name: "Care notes", wedge: "One card per tool", why_open: "Settings get lost", citations: [] },
+        ],
+      });
+    },
+  });
+  assert.equal(dive.status, 200);
+  assert.equal(dive.json.guest, "Idea Forge Niche Scout");
+  assert.equal(dive.json.catalog, "Idealab.ai");
+  assert.equal(dive.json.niches.length, 3);
+  assert.equal(dive.json.niches[0].citations[0], source);
+  assert.match(seenMessage, /Do not fetch it/);
+  assert.doesNotMatch(seenMessage, /fetch\(/);
+});
+
 test("trends work with the database disconnected", async () => {
   const result = await handleForge({ method: "GET", path: ["trends"], store: null });
   assert.equal(result.status, 200);

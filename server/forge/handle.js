@@ -1,5 +1,12 @@
 import { hashPassword, verifyPassword } from "./password.js";
 import {
+  isIdealabCatalog,
+  NICHE_SCOUT_NAME,
+  NICHE_SCOUT_PROMPT,
+  parseBlueOcean,
+  readSourceUrl,
+} from "../../utils/heat/idealabSeed.js";
+import {
   clearSessionCookie,
   hashToken,
   newSessionToken,
@@ -204,6 +211,7 @@ export async function handleForge(request) {
         scores: body.scores ?? body.idea?.scores,
         model_source: body.model_source ?? body.idea?.model_source ?? "puter",
         creative_mode: body.creative_mode ?? body.idea?.creative_mode,
+        source_url: readSourceUrl(body.source_url ?? body.sourceUrl) || null,
       });
       return json(200, { idea, remainingCredits: spent.credits });
     }
@@ -311,12 +319,59 @@ export async function handleForge(request) {
     if (ran.error) return ran.error;
     const text = ran.text;
     const parsed = parseIdeaText(text, prompt, body.creativeMode);
+    const sourceUrl = readSourceUrl(body.source_url || body.sourceUrl);
+    if (sourceUrl) parsed.source_url = sourceUrl;
     let saved = null;
     if (session.user) {
       saved = await store.insertIdea({ ...parsed, user_id: session.user.id });
     }
     const idea = saved || { ...parsed, id: "buffer-assay" };
     return json(200, { ideas: [idea], remainingCredits: session.user?.credits ?? null });
+  }
+
+  if (method === "POST" && route === "/research/blue-ocean") {
+    if (!session.user) {
+      return json(401, { error: "Sign in to open the blue-ocean room.", code: "sign_in" });
+    }
+    const pro = session.user.subscription_status === "pro" || session.user.subscription_status === "active";
+    if (!pro) {
+      return json(403, { error: "Blue-ocean dive is a Pro room.", code: "pro_required" });
+    }
+    const prompt = String(body.prompt || "").trim();
+    if (!prompt) return json(400, { error: "Paste a seed first.", code: "empty_seed" });
+    const rawSource = body.sourceUrl || body.source_url || "";
+    const sourceUrl = readSourceUrl(rawSource);
+    if (String(rawSource).trim() && !sourceUrl) {
+      return json(400, { error: "Use a full https link for the source page.", code: "bad_source" });
+    }
+    const apiKey = String(body.apiKey || env.OPENROUTER_API_KEY || "").trim();
+    if (!apiKey) {
+      return json(503, {
+        error: "Pro is open. Sign in to Puter, or add your OpenRouter key, to run Niche Scout.",
+        code: "missing_key",
+        guest: NICHE_SCOUT_NAME,
+      });
+    }
+    const named = sourceUrl
+      ? `Partner named this page. Cite it only as a link they brought. Do not fetch it: ${sourceUrl}`
+      : "The partner did not name a source page.";
+    const ran = await runModel(completeChat, {
+      apiKey,
+      systemPrompt: NICHE_SCOUT_PROMPT,
+      message: `${named}\nSeed: ${prompt}`,
+      history: [],
+    });
+    if (ran.error) return ran.error;
+    const niches = parseBlueOcean(ran.text);
+    if (!niches) {
+      return json(502, { error: "Niche Scout did not return three niches.", code: "bad_dive" });
+    }
+    return json(200, {
+      guest: NICHE_SCOUT_NAME,
+      sourceUrl: sourceUrl || null,
+      catalog: isIdealabCatalog(sourceUrl) ? "Idealab.ai" : null,
+      niches,
+    });
   }
 
   if (method === "GET" && route === "/stripe/status") {

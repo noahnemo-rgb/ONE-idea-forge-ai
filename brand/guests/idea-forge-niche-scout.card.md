@@ -32,8 +32,10 @@ notes: >
   Compatible API is not standing. Same week as HAS-SITREP-20260915
   — this is not that swarm.
   G002 set this card ready on 2026-09-16; it is not invited; copy into idea-forge is G003 HITL only.
-  G003 HITL copied this robe into Idea Forge on 2026-09-16;
-  runtime call is later; OpenRouter BYOK stays locker room.
+  G003 HITL copied this robe into Idea Forge on 2026-09-16.
+  Pro room: POST /api/research/blue-ocean. The partner pastes one seed
+  and an Idealab.ai page link. The route does not fetch that catalog.
+  OpenRouter BYOK stays locker room. Puter remains the browser heat.
 ---
 
 ## Purpose

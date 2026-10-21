@@ -9,7 +9,9 @@ import {
   Presentation,
   Download,
   CheckCircle2,
+  Compass,
 } from "lucide-react";
+import { isIdealabCatalog } from "@/utils/heat/idealabSeed.js";
 
 export function IdeaCard({
   idea,
@@ -18,6 +20,7 @@ export function IdeaCard({
   onCopy,
   onShare,
   onResearch,
+  onBlueOcean,
   onComments,
   onVote,
   onTechStack,
@@ -98,9 +101,19 @@ export function IdeaCard({
         </div>
       </div>
 
-      <p className="text-white/60 leading-relaxed mb-8 flex-1">
+      <p className="text-white/60 leading-relaxed mb-4 flex-1">
         {idea.description}
       </p>
+      {isIdealabCatalog(idea.source_url) ? (
+        <a
+          href={idea.source_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs font-bold text-[#6855FF] mb-8 break-all"
+        >
+          Seed from Idealab.ai
+        </a>
+      ) : null}
 
       {/* Scores */}
       <div className="grid grid-cols-3 gap-3 mb-8">
@@ -160,7 +173,18 @@ export function IdeaCard({
           <Presentation size={14} />
           Pitch Deck
         </button>
+        {isIdealabCatalog(idea.source_url) ? (
+          <button
+            type="button"
+            onClick={() => onBlueOcean?.(idea)}
+            className="col-span-2 bg-[#6855FF]/15 hover:bg-[#6855FF] hover:text-white py-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 transition-all text-[#6855FF]"
+          >
+            <Compass size={14} />
+            Blue-ocean dive
+          </button>
+        ) : null}
         <button
+          type="button"
           onClick={() => onExport(idea)}
           className="col-span-2 bg-white/5 hover:bg-[#6855FF] hover:text-white py-4 rounded-2xl text-sm font-bold flex items-center justify-center gap-2 transition-all text-white/80"
         >

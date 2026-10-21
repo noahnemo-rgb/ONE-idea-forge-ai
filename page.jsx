@@ -23,10 +23,15 @@ import {
 } from "lucide-react";
 import useUser from "@/utils/useUser";
 import { useQuery } from "@tanstack/react-query";
+import {
+  IDEALAB_CATALOG_URL,
+  readSourceUrl,
+} from "@/utils/heat/idealabSeed.js";
 
 export default function HomePage() {
   const { data: authUser, loading: authLoading } = useUser();
   const [prompt, setPrompt] = useState("");
+  const [sourceUrl, setSourceUrl] = useState("");
   const [isTrendingEnabled, setIsTrendingEnabled] = useState(false);
   const [creativeMode, setCreativeMode] = useState("balanced");
   const [showPromo, setShowPromo] = useState(true);
@@ -187,7 +192,14 @@ export default function HomePage() {
       return;
     }
 
-    window.location.href = `/results?prompt=${encodeURIComponent(prompt)}&trending=${isTrendingEnabled}&mode=${creativeMode}`;
+    const next = new URLSearchParams({
+      prompt,
+      trending: String(isTrendingEnabled),
+      mode: creativeMode,
+    });
+    const source = readSourceUrl(sourceUrl);
+    if (source) next.set("source", source);
+    window.location.href = `/results?${next.toString()}`;
   };
 
   return (
@@ -397,6 +409,27 @@ export default function HomePage() {
                 </button>
               </div>
             </div>
+            <label className="flex flex-col items-start gap-1 text-left px-4 pb-3">
+              <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">
+                Idealab.ai page
+              </span>
+              <input
+                id="idealab-source"
+                type="url"
+                inputMode="url"
+                value={sourceUrl}
+                onChange={(e) => setSourceUrl(e.target.value)}
+                placeholder="Paste one Idealab.ai page, then forge the seed"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-[#6855FF]/50"
+              />
+              {sourceUrl.trim() && !readSourceUrl(sourceUrl) ? (
+                <span className="text-[10px] text-white/40">Use a full https link.</span>
+              ) : (
+                <span className="text-[10px] text-white/30">
+                  A free catalog from Bill Gross. Bring one seed back. We keep the link, not their library.
+                </span>
+              )}
+            </label>
           </div>
         </form>
 
@@ -428,9 +461,14 @@ export default function HomePage() {
                 </p>
               </div>
             </div>
-            <div className="hidden md:block text-xs font-bold text-white/20 uppercase tracking-widest">
-              Updated Daily
-            </div>
+            <a
+              href={IDEALAB_CATALOG_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs font-bold text-[#6855FF] hover:text-white uppercase tracking-widest"
+            >
+              Look through Idealab.ai
+            </a>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">

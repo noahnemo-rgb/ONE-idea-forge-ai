@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { forgeWithPuter } from "@/utils/puterForge";
+import { readSourceUrl } from "@/utils/heat/idealabSeed.js";
 
 export function useResultsData() {
   const [ideas, setIdeas] = useState([]);
@@ -13,12 +14,13 @@ export function useResultsData() {
     const t = params.get("trending");
     const m = params.get("mode");
     const id = params.get("id");
+    const source = readSourceUrl(params.get("source"));
 
     if (id) {
       fetchSingleIdea(id);
     } else if (p) {
       setPrompt(p);
-      fetchIdeas(p, t === "true", m);
+      fetchIdeas(p, t === "true", m, source);
     }
   }, []);
 
@@ -41,11 +43,12 @@ export function useResultsData() {
     }
   };
 
-  const fetchIdeas = async (prompt, trending, mode) => {
+  const fetchIdeas = async (prompt, trending, mode, source) => {
     try {
       setLoading(true);
       try {
         const idea = await forgeWithPuter(prompt, mode);
+        if (source) idea.source_url = source;
         setIdeas([idea]);
         setError(null);
         try {
@@ -63,6 +66,7 @@ export function useResultsData() {
               scores: idea.scores,
               model_source: idea.model_source,
               creative_mode: idea.creative_mode,
+              source_url: source || undefined,
             }),
           });
         } catch {
@@ -76,11 +80,16 @@ export function useResultsData() {
       const response = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, trending, creativeMode: mode }),
+        body: JSON.stringify({ prompt, trending, creativeMode: mode, source_url: source || undefined }),
       });
       if (!response.ok) throw new Error("Failed to generate ideas");
       const data = await response.json();
-      setIdeas(data.ideas);
+      setIdeas(
+        (data.ideas || []).map((idea) => ({
+          ...idea,
+          source_url: idea.source_url || source || "",
+        })),
+      );
     } catch (err) {
       const seed = prompt || "untitled spark";
       setIdeas([
@@ -100,6 +109,7 @@ export function useResultsData() {
           scores: { novelty: 0, feasibility: 0, market: 0 },
           model_source: "guest-stub",
           creative_mode: mode || "balanced",
+          source_url: source || "",
           vote_count: 0,
           user_has_voted: false,
           is_favorite: false,

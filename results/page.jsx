@@ -6,6 +6,7 @@ import { useIdeaActions } from "@/hooks/useIdeaActions";
 import { useShareIdea } from "@/hooks/useShareIdea";
 import { useComments } from "@/hooks/useComments";
 import { useMarketResearch } from "@/hooks/useMarketResearch";
+import { useBlueOcean } from "@/hooks/useBlueOcean";
 import { useTechStack } from "@/hooks/useTechStack";
 import { usePitchDeck } from "@/hooks/usePitchDeck";
 import { useCompetitors } from "@/hooks/useCompetitors";
@@ -17,6 +18,7 @@ import { ErrorState } from "@/components/ResultsPage/ErrorState";
 import { IdeaCard } from "@/components/ResultsPage/IdeaCard";
 import { CommentsModal } from "@/components/ResultsPage/CommentsModal";
 import { MarketResearchModal } from "@/components/ResultsPage/MarketResearchModal";
+import { BlueOceanModal } from "@/components/ResultsPage/BlueOceanModal";
 import { ShareModal } from "@/components/ResultsPage/ShareModal";
 import { TechStackModal } from "@/components/ResultsPage/TechStackModal";
 import { PitchDeckModal } from "@/components/ResultsPage/PitchDeckModal";
@@ -57,6 +59,9 @@ export default function ResultsPage() {
     setResearchResult,
     setIsResearching,
   } = useMarketResearch();
+
+  const { divingIdea, diveResult, diveError, isDiving, handleBlueOcean, closeBlueOcean } =
+    useBlueOcean();
 
   const {
     techStackIdea,
@@ -136,6 +141,7 @@ export default function ResultsPage() {
               onCopy={handleCopyIdea}
               onShare={setSharingIdea}
               onResearch={handleMarketResearch}
+              onBlueOcean={handleBlueOcean}
               onComments={handleFetchComments}
               onVote={handleVote}
               onTechStack={handleTechStack}
@@ -167,6 +173,14 @@ export default function ResultsPage() {
           setResearchResult(null);
           setIsResearching(false);
         }}
+      />
+
+      <BlueOceanModal
+        isDiving={isDiving}
+        diveResult={diveResult}
+        diveError={diveError}
+        divingIdea={divingIdea}
+        onClose={closeBlueOcean}
       />
 
       <ShareModal
