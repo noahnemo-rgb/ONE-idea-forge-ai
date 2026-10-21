@@ -15,11 +15,12 @@ export function useSubscription() {
       return data.status;
     },
     enabled: !!user?.id,
-    refetchInterval: (data) => {
-      // If we just came back from checkout, poll more frequently
+    refetchInterval: () => {
+      // The dev server renders this on the server, where there is no window.
+      if (typeof window === "undefined") return 1000 * 60 * 5;
       const params = new URLSearchParams(window.location.search);
       if (params.get("session_id")) return 3000;
-      return 1000 * 60 * 5; // 5 minutes
+      return 1000 * 60 * 5;
     },
   });
 
