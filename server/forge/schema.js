@@ -36,6 +36,7 @@ export const SCHEMA_STATEMENTS = [
     scores JSONB,
     model_source TEXT,
     creative_mode TEXT,
+    source_url TEXT,
     is_favorite BOOLEAN NOT NULL DEFAULT FALSE,
     visibility TEXT NOT NULL DEFAULT 'private',
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -62,6 +63,7 @@ export const SCHEMA_STATEMENTS = [
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     UNIQUE (idea_id, user_id)
   )`,
+  `ALTER TABLE ideas ADD COLUMN IF NOT EXISTS source_url TEXT`,
   `CREATE TABLE IF NOT EXISTS chat_messages (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,

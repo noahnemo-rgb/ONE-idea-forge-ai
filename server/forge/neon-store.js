@@ -78,9 +78,9 @@ export function createNeonStore(sql) {
         `INSERT INTO ideas (
            user_id, prompt, title, description, target_audience, problem_solved,
            unique_value_prop, key_features, monetization_strategies, technical_feasibility,
-           market_validation_hints, scores, model_source, creative_mode, visibility
+           market_validation_hints, scores, model_source, creative_mode, source_url, visibility
          ) VALUES (
-           $1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9::jsonb,$10,$11,$12::jsonb,$13,$14,$15
+           $1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9::jsonb,$10,$11,$12::jsonb,$13,$14,$15,$16
          ) RETURNING *`,
         [
           input.user_id,
@@ -97,6 +97,7 @@ export function createNeonStore(sql) {
           JSON.stringify(input.scores ?? {}),
           input.model_source ?? "ai-buffer",
           input.creative_mode ?? "balanced",
+          input.source_url ?? null,
           input.visibility ?? "private",
         ],
       );
